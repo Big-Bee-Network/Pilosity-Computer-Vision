@@ -38,12 +38,10 @@ This file contains most of the functions that are used in this repository.
 The functions that make the augmented images are located in make_augment_functions.py
 '''
 
-root = os.getcwd()
-results = os.path.join(root, 'analysis_results')
+results = os.path.join(parent, 'analysis_results')
 
 # Checks if each directory from the list of directories exists, and if not, creates the directory.
 def make_directories(directory_list):
-  parent = os.path.abspath(os.path.join(root, os.pardir)) # gets the parent directory
   for i in directory_list:
     path = os.path.join(parent, i)
     if not os.path.isdir(path):
@@ -54,11 +52,11 @@ def make_directories(directory_list):
 '''
 Calculates the average pixel value (brightness) of the bee pixels in an image, then saves each image name and corresponding pixel value to a csv.
 Requires a folder or list of segmented masks to work. Does not include the pixel values of any non-bee pixel.
-Set load = False if you are creating a new csv, and set load = True if you are adding more rows to an existing average_brightness csv.
+Set load = False if you are creating a new csv, and set load = True if you are adding more rows to an existing brightness_values csv.
 This function is very time-intensive, so it may be necessary to divide up your lists of images and masks and run the function several times, with load set to True.  
 '''
-def calculate_brightness(images, masks, images_directory, csv_path = os.path.join(root, 'average_brightness.csv'),
-                         load_csv_path = os.path.join(root, 'average_brightness.csv'), save = True, load = False):
+def calculate_brightness(images, masks, images_directory, csv_path = os.path.join(results, 'brightness_values.csv'),
+                         load_csv_path = os.path.join(results, 'brightness_values.csv'), save = True, load = False):
   if load:
     try:
       df = pd.read_csv(load_csv_path, index_col = False)
@@ -94,7 +92,7 @@ def calculate_brightness(images, masks, images_directory, csv_path = os.path.joi
 
 # Uses the predicted bee masks to artificially remove the eyes, wings, and antennae
 # from the original bee images, then saves these modified images in a new folder.
-def make_fake_bees(images_path, mask_names, masks_path, predicted_masks = None, save_path = os.path.join(root, "artificial_bees")):
+def make_fake_bees(images_path, mask_names, masks_path, predicted_masks = None, save_path = os.path.join(parent, "artificial_bees")):
   if not os.path.isdir(save_path):
     os.mkdir(save_path)
 
@@ -274,7 +272,7 @@ This is a modified version of code originally written by Nicholas Alexander.
 Used to resize the predicted images back to their original sizes.
 If save = True, it also saves the predicted images to the designated save path.
 '''
-def resize_predictions(predictions, dataset, save=True, save_path=os.path.join(root, 'predicted_bee_masks/')):
+def resize_predictions(predictions, dataset, save=True, save_path=os.path.join(parent, 'predicted_bee_masks/')):
   i = 0
   predicted_masks = []
   for predicted_256x256_mask, original_height, original_width in predictions:
@@ -297,7 +295,7 @@ Takes a nested list of predicted crops and restitches them back into a full mask
 If save = True, it also saves the restitched predicted images to the designated save path.
 '''
 def restitch_predictions(predictions, test_dataset, save=True,
-                         save_path=os.path.join(root, 'predicted_hair_masks/')):
+                         save_path=os.path.join(parent, 'predicted_hair_masks/')):
   restitched_images = []
   idx = 0
   for image in predictions:
@@ -371,8 +369,7 @@ def display_image_grid(images_filenames, images_directory, masks_directory = Non
       ax[i, cols - 1].set_axis_off()
   plt.tight_layout()
   if save:
-    root = os.getcwd()
-    filename = os.path.join(root, save_path)
+    filename = os.path.join(results, save_path)
     plt.savefig(filename + filetype, bbox_inches='tight')
     plt.close(figure)
   else:
@@ -405,8 +402,7 @@ def display_bees(images_filenames, images_directory, predicted_masks,
 
   plt.tight_layout()
   if save:
-    root = os.getcwd()
-    filename = os.path.join(root, save_path)
+    filename = os.path.join(results, save_path)
     plt.savefig(filename + filetype, bbox_inches='tight')
     plt.close(figure)
   else:
@@ -644,6 +640,7 @@ def crop(image, crop_height = 300, crop_width = 300):
 '''
 Counts how many images and their corresponding masks have mismatched sizes, and saves the names of any mismatched pairs,
 along with their respective sizes, to a csv. Then prints the numbers of pairs with matching and not matching shapes.
+The csv created is saved in the same folder that is being checked.
 '''
 def entire_folder_check(folder, image_path, mask_path, csv='unmatched_shapes.csv'):
   root = os.getcwd()
@@ -661,7 +658,7 @@ def entire_folder_check(folder, image_path, mask_path, csv='unmatched_shapes.csv
     else:
       same_shape += 1
 
-  df.to_csv(root + csv)
+  df.to_csv(os.path.join(root, csv))
 
   print(same_shape, different_shape)
 
@@ -731,8 +728,9 @@ Specify the lists of filenames before using them as function arguments.
 This function will most likely be used if you acquire more data and want them to add them to train/validation/test datasets.
 In such situations, make sure the older filenames are included in the lists as well, or else they will not be saved to the csv files. 
 '''
-def add_new_filenames(train, val, test, train_csv=root + 'train_images.csv', val_csv=root + 'val_images.csv',
-                      test_csv=root + 'test_images.csv'):
+def add_new_filenames(train, val, test, train_csv = os.path.join(matl, 'train_images.csv'),
+                      val_csv = os.path.join(matl, 'val_images.csv'),
+                      test_csv = os.path.join(matl, 'test_images.csv')):
   train_df = pd.DataFrame(columns=['0'])
   train_df['0'] = train
 
@@ -761,7 +759,7 @@ def maskless(images, masks, path, csv = 'maskless_whole_bees.csv'):
   df['path'] = no_mask
   df.head()
   print(no_mask)
-  df.to_csv(root + csv)
+  df.to_csv(os.path.join(matl, csv))
 
 
 # Housekeeping function, used if you want to copy all images from the start_path directory to the destination_path directory.
@@ -1020,8 +1018,7 @@ def train_hairiness_model(model, device, dataloaders, rank_tensor, dataset_sizes
 
 
 def hairiness_rating(root_dir, model, device, rank_dict, data_transform):
-  root = os.getcwd()
-  csv_path = os.path.join(root, 'analysis_results/surface_areas.csv')
+  csv_path = os.path.join(results, 'surface_areas.csv')
   idx_tensor = [idx for idx in range(20)]
   idx_tensor = Variable(torch.FloatTensor(idx_tensor)).to(device)
   rank_list = []

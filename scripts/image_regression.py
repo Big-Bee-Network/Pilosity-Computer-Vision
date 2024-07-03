@@ -25,7 +25,7 @@ from skimage.morphology import disk
 from skimage.color import rgb2gray
 import csv
 from collections import defaultdict
-from classes import HairnessRatingDataset, BasicBlock, Bottleneck, ResNet
+from classes import HairinessRatingDataset, BasicBlock, Bottleneck, ResNet
 from functions import show_landmarks_batch, train_hairiness_model
 
 
@@ -33,7 +33,7 @@ from functions import show_landmarks_batch, train_hairiness_model
 def image_regression(csv_file, root_dir, model_save_path):
     '''
     csv_file: the path to csv file that store the ground truth (manual) ratings for the artifical bees
-    root_dir: the directory to artificial bees
+    root_dir: the directory to artificial bee crops
     model_save_path: the path to save the model
     '''
 
@@ -46,12 +46,12 @@ def image_regression(csv_file, root_dir, model_save_path):
     rank_dict = rating_frame.set_index(['7'])['1.8'].to_dict()
     # print(rank_dict)
 
-    rating_dataset = HairnessRatingDataset(csv_file, root_dir)
+    rating_dataset = HairinessRatingDataset(csv_file, root_dir)
     ratings = rating_dataset.rating_frame
     # show data distribution
     ratings.hist(bins=5, figsize=(8, 8))
 
-    rating_dataset = HairnessRatingDataset(csv_file, root_dir, transform=transforms.Compose([
+    rating_dataset = HairinessRatingDataset(csv_file, root_dir, transform=transforms.Compose([
         # transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
@@ -94,8 +94,8 @@ def image_regression(csv_file, root_dir, model_save_path):
     ])
 
     # Set up the dataset
-    rating_dataset = HairnessRatingDataset(csv_file, root_dir,
-                                           transform=data_transform)
+    rating_dataset = HairinessRatingDataset(csv_file, root_dir,
+                                            transform=data_transform)
 
     # Set the ratio of the length of training dataset and validation dataset to be 8:2
     train_len = int(len(rating_dataset) * 0.8)
@@ -234,7 +234,7 @@ def predicted_rating_entropy_values(csv_file, root_dir, model_save_path, predict
     model = ResNet(resnet50_config, OUTPUT_DIM)
 
     # model = torch.load(model_save_path, map_location=device)
-    softmax = nn.Softmax(dim = -1).to(device)
+    softmax = nn.Softmax(dim = -1).to(device) # I set dim = -1 and this seemed to actually allow the model to train. Could be a source of an issue though
 
     rating_frame = pd.read_csv(csv_file)
     rank_dict = rating_frame.set_index(['7'])['1.8'].to_dict()
@@ -250,8 +250,8 @@ def predicted_rating_entropy_values(csv_file, root_dir, model_save_path, predict
     rank_tensor = Variable(torch.FloatTensor(rank_list)).to(device)
 
     # Set up the dataset
-    rating_dataset = HairnessRatingDataset(csv_file, root_dir,
-                                           transform=data_transform)
+    rating_dataset = HairinessRatingDataset(csv_file, root_dir,
+                                            transform=data_transform)
 
     # Set the ratio of the length of training dataset and validation dataset to be 8:2
     train_len = int(len(rating_dataset) * 0.8)
@@ -388,8 +388,8 @@ def predicted_rating_entropy_surface_area(csv_file, model_save_path, root_dir, c
     whole_bee_dict = defaultdict(list)
 
     # Set up the dataset
-    rating_dataset = HairnessRatingDataset(csv_file, crop_dir,
-                                           transform=data_transform)
+    rating_dataset = HairinessRatingDataset(csv_file, crop_dir,
+                                            transform=data_transform)
 
     # Normalize the images by calculating the mean and std of the images in the dataset
     dataset_loader = DataLoader(rating_dataset,

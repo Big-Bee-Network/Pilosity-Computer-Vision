@@ -20,7 +20,7 @@ from functions import disk_iterations, threshold_checker
 
 '''
 Loop over the entire folder for artificial_bees using disk 6
-Get the matrix of means, median, and standard deviations of enprty valueseach artificial bee image
+Get the matrix of means, median, and standard deviations of entropy values of each artificial bee image
 Output the entropy images to entropy_output_path
 '''
 def entropy_analysis(image_folder_path, entropy_output_path, csv_file_name):
@@ -31,7 +31,7 @@ def entropy_analysis(image_folder_path, entropy_output_path, csv_file_name):
   '''
 
   for image_name in os.listdir(image_folder_path):
-    im = imread(image_folder_path + image_name)
+    im = cv2.imread(os.path.join(image_folder_path, image_name))
     # convert image to grayscale
     im_gray = rgb2gray(im)
     entropy_image = entropy(im_gray, disk(6))
@@ -52,4 +52,4 @@ def entropy_analysis(image_folder_path, entropy_output_path, csv_file_name):
       f_object.close()
 
     # save entropy images to output_path
-    plt.imsave(entropy_output_path + image_name, entropy_image, cmap = 'magma')
+    plt.imsave(os.path.join(entropy_output_path, image_name), entropy_image, cmap = 'magma')

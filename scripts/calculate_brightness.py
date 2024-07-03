@@ -10,7 +10,7 @@ from albumentations.pytorch import ToTensorV2
 
 '''
 IMPORTANT NOTE:
-set load = True if you are adding more rows to an existing average_brightness csv.
+set load = True if you are adding more rows to an existing brightness_values csv.
 Depending on your available hardware, this script may take up a lot of time and RAM, so it will likely be necessary to divide up your 
 lists of images and masks and run the function several times. After running it the first time, change the load parameter from False to True.
 This allows the calculate_brightness function to load and add on to the csv file created when the function was run the first time, 
@@ -25,12 +25,13 @@ It is important to note that although the bee segmentation model used for most o
 antennae, and tongues, the model used for this script does not so that those parts of the bee can be included in the brightness calculation.
 '''
 def calculate_brightness_main():
-    device = "cuda" if torch.cuda.is_available() else torch.device('cpu')
     root = os.getcwd()
-    results = os.path.join(root, 'analysis_results')
-    bee_images_directory = os.path.join(root, 'bee_original/')
+    parent = os.path.abspath(os.path.join(root, os.pardir))
+    device = "cuda" if torch.cuda.is_available() else torch.device('cpu')
+    results = os.path.join(parent, 'analysis_results')
+    bee_images_directory = os.path.join(parent, 'bee_original/')
     images = os.listdir(bee_images_directory)
-    model = torch.load(root + '/models/New_Bee_Model', map_location = device).to(device)
+    model = torch.load(os.path.join(parent, 'models/New_Bee_Model'), map_location = device).to(device)
     params = {
         "device": device,
         "batch_size": 16,
@@ -45,9 +46,9 @@ def calculate_brightness_main():
 
     test_dataset = BeeInferenceDataset(images, bee_images_directory, image_transform=image_transform)
     predictions = predict(model, params, test_dataset)
-    predicted_masks = resize_predictions(predictions, test_dataset, save=True, save_path = os.path.join(root, 'predicted_bees_with_eyes_wings_antennae/'))
+    predicted_masks = resize_predictions(predictions, test_dataset, save=True, save_path = os.path.join(parent, 'predicted_bees_with_eyes_wings_antennae/'))
 
     calculate_brightness(images, predicted_masks, bee_images_directory,
-                         csv_path=os.path.join(results, 'average_brightness.csv'),
-                         load_csv_path=os.path.join(results, 'average_brightness.csv'),
+                         csv_path=os.path.join(results, 'brightness_values.csv'),
+                         load_csv_path=os.path.join(results, 'brightness_values.csv'),
                          save = True, load = False)

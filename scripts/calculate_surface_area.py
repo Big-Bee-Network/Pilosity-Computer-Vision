@@ -18,21 +18,22 @@ are not included in any surface area calculations. This is because we are not in
 those regions, so we excluded them from the total area of the bee's body that we want to measure hair on.   
 '''
 def calculate_surface_area_main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
     root = os.getcwd()
-    results = os.path.join(root, 'analysis_results')
-    bee_images_directory = os.path.join(root, 'bee_original')
-    artificial_bees_directory = os.path.join(root, 'artificial_bees')
-    bee_masks_directory = os.path.join(root, 'predicted_bee_masks')
-    hair_masks_directory = os.path.join(root, 'predicted_hair_masks')
+    parent = os.path.abspath(os.path.join(root, os.pardir))
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    results = os.path.join(parent, 'analysis_results')
+    bee_images_directory = os.path.join(parent, 'bee_original')
+    artificial_bees_directory = os.path.join(parent, 'artificial_bees')
+    bee_masks_directory = os.path.join(parent, 'predicted_bee_masks')
+    hair_masks_directory = os.path.join(parent, 'predicted_hair_masks')
 
     bee_images = os.listdir(bee_images_directory)
     artificial_bees = os.listdir(artificial_bees_directory)
     bee_masks = os.listdir(bee_masks_directory)
     hair_masks = os.listdir(hair_masks_directory)
 
-    bee_model = torch.load(root + '/models/New_Bee_Model', map_location=device).to(device)
-    hair_model = torch.load(root + '/models/Hair_model.pth', map_location=device).to(device)
+    bee_model = torch.load(parent + '/models/New_Bee_Model', map_location=device).to(device)
+    hair_model = torch.load(parent + '/models/Hair_model', map_location=device).to(device)
 
     params = {
         "device": device,

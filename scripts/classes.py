@@ -205,7 +205,7 @@ Name: Luning Ding
 Date: July 5, 2023
 '''
 
-class HairnessRatingDataset(Dataset):
+class HairinessRatingDataset(Dataset):
   def __init__(self, csv_file, root_dir, transform=None):
     # Arguments:
     #     csv_file (string): Path to the csv file with annotations.
