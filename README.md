@@ -160,4 +160,10 @@ path = root + 'image_regression/'
 
 This folder contains the data and models necessary for the hairiness rating scripts. Use if you plan on calculating hairiness scores for bee images.
 
+**training_materials**
+
+path = root + 'training_materials/'
+
+This folder contains csv files that are used for training the models. Any files that you may create for this purpose, such as csv files of all the training, validation, and test set filenames, will be stored in this folder.
+
 ### Citation
