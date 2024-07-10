@@ -5,8 +5,9 @@ Here, we present a computer vision model that uses image segmentation to analyze
 
 More information on the project can be found in the related publication: Climate explains global functional trait variation in bees: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12572899.svg)](https://doi.org/10.5281/zenodo.12572899)
 
-
+<div align="center">
 <img src="Pilosity_Fig1_workflow.jpg" alt="workflow" height="800"/>
+</div>
 
 ## Repository Contents
 **root:** The path of the directory where everything is located. Called by getting os.cwd(). For organization purposes, every subfolder and script should be located in the root folder. All other folders will be named assuming they are located in the root folder.
