@@ -5,7 +5,7 @@ Here, we present a computer vision model that uses image segmentation to analyze
 
 More information on the project can be found in the related publication: Climate explains global functional trait variation in bees: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12572899.svg)](https://doi.org/10.5281/zenodo.12572899)
 
-![model pipeline](Pilosity_Fig1_workflow.pdf)
+![model pipeline](Pilosity_Fig1_workflow.jpg)
 
 ## Repository Contents
 **root:** The path of the directory where everything is located. Called by getting os.cwd(). For organization purposes, every subfolder and script should be located in the root folder. All other folders will be named assuming they are located in the root folder.
@@ -18,7 +18,7 @@ path: root + 'scripts/'
 
 This folder contains all of our scripts, including main.py. We have informally divided them further into a few different categories.
 
-### Category: Image Segmentation
+#### Image Segmentation
 
 To run all segmentation and analysis code, first ensure the current working directory is the location of this folder. Then, run the following:
 ```
@@ -39,14 +39,14 @@ python main.py
 
 **paths.py**: Contains file paths used by the other scripts.
 
-### Category: Trait Quantification
+### Trait Quantification
 Scripts to quantify bee pilosity and lightness from the image segments created above.
 
 **calculate_surface_area.py**: Calculates hair coverage for each image by dividing the number of predicted hair pixels by the number of predicted bee pixels.
 
 **calculate_brightness.py**: Calculates lightness as the median pixel-wise lightness in the focal body region segment. 
 
-### Category: Model Training
+#### Model Training
 Additional scripts useful for further model training.
 
 **bee_crops.py**: Divides images into smaller cropped images. This is useful when creating hair masks, because manually masking hair from whole images is very labor intensive. 
@@ -56,7 +56,7 @@ Additional scripts useful for further model training.
 **make_augmentations.py**: Creates augmented images and masks.
 
 
-### Category: Miscellaneous Scripts and Files
+### Miscellaneous Scripts and Files
 Additional resources under development, not featured in the main publication.
 
 **remove_background.py**: Removes the backgrounds from bee images and saves those images into a separate folder. 
