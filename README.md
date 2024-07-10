@@ -3,9 +3,9 @@
 
 Here, we present a computer vision model that uses image segmentation to analyze bee trait data. This model takes lateral images of bee specimens and segments a focal region of the body which excludes the wings, eyes, antennae, tongue, and stinger. This focal body region is the principal hair-covered region of the bee's body. This segmentation model also removes the bee from it's background and specimen pin, if present. A second segmentation model takes the output image and further segments the hair from the non-hair regions of the bee. Using these two segments, we calculate the proportion of the focal body region covered in hair. We also use the segmented focal body region to estimate the overall coloration of the bee's body surface, quantified as the median pixel lightness value of all bee pixels. 
 
-More information on the project can be found in the related publication, Computer vision reveals climate predictors of global functional trait variation in bees: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12572899.svg)](https://doi.org/10.5281/zenodo.12572899)
+More information on the project can be found in the related publication: Climate explains global functional trait variation in bees: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12572899.svg)](https://doi.org/10.5281/zenodo.12572899)
 
-![model pipeline](misc_scripts_and_files/pilosity_pipeline.jpg)
+![model pipeline](Pilosity_Fig1_workflow.pdf)
 
 ## Repository Contents
 **root:** The path of the directory where everything is located. Called by getting os.cwd(). For organization purposes, every subfolder and script should be located in the root folder. All other folders will be named assuming they are located in the root folder.
