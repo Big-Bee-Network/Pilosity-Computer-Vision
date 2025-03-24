@@ -195,11 +195,10 @@ def train(model, batch_size, loss_fn, train_dataloader, val_dataloader, schedule
         voutputs = model(vinputs)
         voutputs = torch.sigmoid(voutputs)
         vloss = loss_fn(voutputs, vlabels)
-        running_vloss += vloss
-
-    scheduler.step(running_vloss)
+        running_vloss += vloss.item()
 
     avg_vloss = running_vloss / (i + 1)
+    scheduler.step(avg_vloss)
     print('LOSS train {} val {}'.format(avg_loss, avg_vloss))
 
     epoch_number += 1
@@ -427,7 +426,7 @@ def count_surface_area(bee_masks, hair_masks, dataset, save_path, load_path, sav
     bee_unique = np.unique(bee_masks[i], return_counts=True)
     hair_unique = np.unique(hair_masks[i], return_counts=True)
     if bee_unique[1][0] == np.size(bee_masks[i]):
-      df.loc[len(df)] = [name, 0, 0]
+      df.loc[len(df)] = [name, 0, 0, '0.0%']
     elif len(bee_unique[1]) == 2:
       bee_pixels = bee_unique[1][1]
       hair_pixels = hair_unique[1][1]
@@ -454,6 +453,19 @@ def jaccard(y_true, y_pred):
 def dice(y_true, y_pred):
   return (2 * (y_true * y_pred).sum() + 1e-15) / (y_true.sum() + y_pred.sum() + 1e-15)
 
+# Calculates the dice loss using the dice coefficient
+# Must ensure y_true and y_pred are Pytorch tensors
+def dice_loss(y_true, y_pred):
+  return 1 - dice(y_true, y_pred)
+
+# Calculates the loss as a mix of dice and BCE
+# Must ensure y_true and y_pred are Pytorch tensors
+def dice_bce(y_true, y_pred):
+  loss = nn.BCELoss()
+  bce = loss(y_true, y_pred)
+  dice_ = dice_loss(y_true, y_pred)
+
+  return 0.5 * (dice_ + bce)
 
 # Originally written by Nicholas Alexander.
 # Calculates the raw accuracy score of accurate pixels divided by the total pixels.

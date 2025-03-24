@@ -20,14 +20,13 @@ Only set to True if you have a set of images and corresponding masks for the mod
 Set the seed for reproducibility.
 '''
 def segment_bee_main(background_removed = False, to_train = False, seed = 0):
-    root = os.getcwd()
     if background_removed:
-        images_directory = os.path.join(root, 'removed_background_bees')
+        images_directory = os.path.join(parent, 'removed_background_bees')
     else:
-        images_directory = os.path.join(root, 'bee_original')
+        images_directory = os.path.join(parent, 'bee_original')
 
-    results = os.path.join(root, 'analysis_results')
-    masks_directory = os.path.join(root, 'original_bee_masks/')
+    results = os.path.join(parent, 'analysis_results')
+    masks_directory = os.path.join(parent, 'original_bee_masks/')
     images = os.listdir(images_directory)
     masks = os.listdir(masks_directory)
 
@@ -45,7 +44,7 @@ def segment_bee_main(background_removed = False, to_train = False, seed = 0):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = torch.load(root + '/models/New_Bee_Model', map_location=device).to(device)
+    model = torch.load(parent + '/models/New_Bee_Model', map_location=device).to(device)
 
     params = {
         "device": device,

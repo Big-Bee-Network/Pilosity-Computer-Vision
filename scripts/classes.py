@@ -201,6 +201,58 @@ class CroppedDataset(Dataset):
       return croplist
 
 '''
+Generalized Dice Loss, used in the loss function for hair segmentation. 
+GDE is a more sophisticated version of Dice loss that handles binary 
+unbalanced classes by weighting the foreground and background separately 
+and assigning weights inversely proportional to class prevalence.
+The class method smooth is simply a smoothing parameter used in the weight 
+calculations to ensure there are no zeros in the denominator.
+'''
+class GDL(nn.Module):
+    def __init__(self, smooth=1e-5):
+        super(GDL, self).__init__()
+        self.smooth = smooth
+
+    def forward(self, y_pred, y_true):
+        y_pred = y_pred.float()
+        y_true = y_true.float()
+        y_pred_flat = y_pred.view(y_pred.shape[0], -1)
+        y_true_flat = y_true.view(y_true.shape[0], -1)
+
+        intersection = (y_pred_flat * y_true_flat).sum(dim=1)
+        y_pred_sum = y_pred_flat.sum(dim=1)
+        y_true_sum = y_true_flat.sum(dim=1)
+
+        # Weigh foreground and background separately so that GDL doesn't just predict everything as background (not hair)
+        weights_f = 1.0 / (torch.pow(y_true_sum, 2) + self.smooth)
+        weights_b = 1.0 / (torch.pow(y_true_flat.size(1) - y_true_sum, 2) + self.smooth)
+        weights = torch.stack([weights_f, weights_b], dim = 1)
+        numerator = 2.0 * (weights * intersection).sum()
+        denominator = (weights * (y_pred_sum + y_true_sum)).sum()
+
+        score = (numerator + self.smooth) / (denominator + self.smooth)
+
+        return 1.0 - score
+
+'''
+Official hair segmentation loss, a weighted sum of the GDL and BCE loss of the data. 
+The alpha class method determines how much weight to assign to the GDL loss, and the 
+remaining weight is assigned to the BCE loss.
+self.dice and self.bce are simply the two losses calculated separately before added together.
+'''
+class GDL_BCE(nn.Module):
+    def __init__(self, alpha=0.75, smooth=1e-5):
+        super(GDL_BCE, self).__init__()
+        self.alpha = alpha
+        self.dice = GDL(smooth=smooth)
+        self.bce = nn.BCELoss()
+
+    def forward(self, y_pred, y_true):
+        dice_loss = self.dice(y_pred, y_true)
+        bce_loss = self.bce(y_pred, y_true)
+        return self.alpha * bce_loss + (1 - self.alpha) * dice_loss
+
+'''
 Name: Luning Ding
 Date: July 5, 2023
 '''

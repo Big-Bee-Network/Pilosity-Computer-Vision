@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from paths import *
-from classes import BeeInferenceDataset, CroppedDataset
+from classes import BeeInferenceDataset, CroppedDataset, GDL_BCE
 from functions import train, predict, resize_predictions, display_image_grid, display_bees, calculate_accuracy, predict_crops, restitch_predictions
 
 '''
@@ -20,13 +20,13 @@ I would generally not recommend you set to_crop to False, as the model is pre-tr
 to_train determines if the model will be trained on a set of images and masks before the model outputs predicted segmentations.
 Only set to True if you have a set of images and corresponding masks for the model to train on.
 Set the seed for not reproducibility.
+Default loss option is "mixed," which uses the combined GDL and BCE loss. Set to "BCE" for only BCE loss.
 '''
-def segment_hair_main(to_crop = True, to_train = False, seed = 0):
-    root = os.getcwd()
-    results = os.path.join(root, 'analysis_results')
-    images_directory = os.path.join(root, 'artificial_bees/')
-    masks_directory = os.path.join(root, 'original_hair_masks/')
-    predicted_masks_directory = os.path.join(root, 'predicted_hair_masks/')
+def segment_hair_main(to_crop = True, to_train = False, seed = 0, loss = "mixed"):
+    results = os.path.join(parent, 'analysis_results')
+    images_directory = os.path.join(parent, 'artificial_bees/')
+    masks_directory = os.path.join(parent, 'original_hair_masks/')
+    predicted_masks_directory = os.path.join(parent, 'predicted_hair_masks/')
     images = os.listdir(images_directory)
     masks = os.listdir(masks_directory)
 
@@ -44,7 +44,7 @@ def segment_hair_main(to_crop = True, to_train = False, seed = 0):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = torch.load(root + '/models/Hair_model', map_location=device).to(device)
+    model = torch.load(parent + '/models/Hair_model', map_location=device).to(device)
 
     params = {
         "device": device,
@@ -73,7 +73,13 @@ def segment_hair_main(to_crop = True, to_train = False, seed = 0):
         [A.Resize(256, 256), ToTensorV2()]
     )
 
-    loss_fn = nn.BCELoss()
+    if loss == "mixed":
+        loss_fn = GDL_BCE()
+    elif loss == "BCE":
+        loss_fn = nn.BCELoss()
+    else:
+        raise ValueError("Loss parameter must be set to 'mixed' or 'BCE' only.")
+    
     optimizer = optim.Adam(model.parameters(), lr = params['lr'], weight_decay=1e-5)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience = 4)
 
